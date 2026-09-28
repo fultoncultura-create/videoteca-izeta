@@ -177,6 +177,16 @@
   .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
   .seg button[aria-pressed="true"] small { color: inherit; opacity: .8; }
   .seg button:disabled { cursor: not-allowed; opacity: .4; }
+  .actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .dl {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+  }
+  .dl:hover { background: var(--accent); color: var(--accent-ink); }
+  .dl svg { width: 17px; height: 17px; }
+  .dl small { font-weight: 500; opacity: .7; font-variant-numeric: tabular-nums; }
+  .dl small:empty { display: none; }
   .ext { font-size: 14px; font-weight: 500; color: var(--accent); text-decoration: none; }
   .ext:hover { text-decoration: underline; }
   .note { margin: 0; font-size: 13px; color: var(--muted); background: var(--bg); border-radius: 10px; padding: 8px 12px; }
@@ -237,7 +247,13 @@
             <span class="lbl">Qualidade</span>
             <div class="seg" id="seg" role="group" aria-label="Qualidade do vídeo"></div>
           </div>
-          <a class="ext" id="pLink" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>
+          <div class="actions">
+            <a class="dl" id="pDown" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+              <span>Baixar vídeo</span><small id="pSize"></small>
+            </a>
+            <a class="ext" id="pLink" target="_blank" rel="noopener">Abrir no Drive ↗</a>
+          </div>
         </div>
         <p class="note" id="pNote" hidden></p>
       </div>
@@ -274,6 +290,8 @@
   const thumbUrl = v => `https://drive.google.com/thumbnail?id=${v.capa || v.versoes.alta}&sz=w640`;
   const previewUrl = id => `https://drive.google.com/file/d/${id}/preview`;
   const viewUrl = id => `https://drive.google.com/file/d/${id}/view`;
+  // confirm=t pula o aviso do Drive de "arquivo grande demais para verificar vírus"
+  const downloadUrl = id => `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
 
   // Destaca os termos buscados sem quebrar acentos
   function highlight(text, terms) {
@@ -398,6 +416,9 @@
     const src = previewUrl(id);
     if (frame.getAttribute("src") !== src) frame.src = src;
     $("#pLink").href = viewUrl(id);
+    $("#pDown").href = downloadUrl(id);
+    // O tamanho cadastrado vale para o arquivo original (alta)
+    $("#pSize").textContent = escolhida === "alta" && v.tamanho ? `· ${v.tamanho}` : "";
   }
 
   seg.addEventListener("click", e => {
