@@ -287,7 +287,10 @@
 
   const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const thumbUrl = v => `https://drive.google.com/thumbnail?id=${v.capa || v.versoes.alta}&sz=w640`;
+  // capa: caminho de imagem no site (ex.: "capas/x.jpg") ou ID de imagem no Drive
+  const thumbUrl = v => v.capa && /[./]/.test(v.capa)
+    ? v.capa
+    : `https://drive.google.com/thumbnail?id=${v.capa || v.versoes.alta}&sz=w640`;
   const previewUrl = id => `https://drive.google.com/file/d/${id}/preview`;
   const viewUrl = id => `https://drive.google.com/file/d/${id}/view`;
   // confirm=t pula o aviso do Drive de "arquivo grande demais para verificar vírus"

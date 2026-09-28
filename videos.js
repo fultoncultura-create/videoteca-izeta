@@ -14,7 +14,8 @@
                  quando preenchidas, os botões Média/Baixa passam a tocar
                  esses arquivos mais leves.
     tamanho    – (opcional) tamanho do arquivo original, mostrado no botão Baixar.
-    capa       – (opcional) ID de uma imagem no Drive para usar como capa.
+    capa       – (opcional) imagem de capa: um arquivo da pasta capas/ do site
+                 (ex.: "capas/foto.jpg") ou o ID de uma imagem no Drive.
                  Sem ela, a página usa o quadro que o Drive gera do vídeo.
 */
 window.VIDEOS = [
@@ -25,7 +26,7 @@ window.VIDEOS = [
     categoria: "Izeta",
     formato: "horizontal",
     versoes: { alta: "1tOkt2AncpCvVTkZdkUgvDvLplz-jg7Is" },
-    tamanho: "115 MB"
+    tamanho: "115 MB", capa: "capas/1tOkt2AncpCvVTkZdkUgvDvLplz-jg7Is.jpg"
   },
   {
     titulo: "Organização e Serviços de Saúde",
@@ -33,7 +34,7 @@ window.VIDEOS = [
     categoria: "Izeta",
     formato: "horizontal",
     versoes: { alta: "1eJxP4W1pBvI-yDbocsowK_4cWaufUPcz" },
-    tamanho: "315 MB"
+    tamanho: "315 MB", capa: "capas/1eJxP4W1pBvI-yDbocsowK_4cWaufUPcz.jpg"
   },
   {
     titulo: "Qualidade Izeta · Versão A",
@@ -67,7 +68,7 @@ window.VIDEOS = [
     categoria: "SESI",
     formato: "horizontal",
     versoes: { alta: "1J2WtcSswhHVKcVh0VUkheCkfTfX9NVH-" },
-    tamanho: "1,0 GB"
+    tamanho: "1,0 GB", capa: "capas/1J2WtcSswhHVKcVh0VUkheCkfTfX9NVH-.jpg"
   },
   {
     titulo: "SESI Odonto · Vídeo 01",
@@ -85,7 +86,7 @@ window.VIDEOS = [
     categoria: "ANAMT",
     formato: "horizontal",
     versoes: { alta: "1E35PMm0PpkmmH416K5BJV8F2i_LVTXjr" },
-    tamanho: "64 MB"
+    tamanho: "64 MB", capa: "capas/1E35PMm0PpkmmH416K5BJV8F2i_LVTXjr.jpg"
   },
   {
     titulo: "Preparatório ANAMT",
@@ -93,7 +94,7 @@ window.VIDEOS = [
     categoria: "ANAMT",
     formato: "horizontal",
     versoes: { alta: "1UNUZopXAbBjSJN_ArRZD-pPF5rSGSn8F" },
-    tamanho: "50 MB"
+    tamanho: "50 MB", capa: "capas/1UNUZopXAbBjSJN_ArRZD-pPF5rSGSn8F.jpg"
   },
   {
     titulo: "ANAMT · Vídeo vertical",
@@ -101,7 +102,7 @@ window.VIDEOS = [
     categoria: "ANAMT",
     formato: "vertical",
     versoes: { alta: "1PuQ3jkf5ux3u8OYQkervZgYerbJcQ7aH" },
-    tamanho: "52 MB"
+    tamanho: "52 MB", capa: "capas/1PuQ3jkf5ux3u8OYQkervZgYerbJcQ7aH.jpg"
   },
   {
     titulo: "ANAMT · Carrossel animado",
@@ -119,7 +120,7 @@ window.VIDEOS = [
     categoria: "APS",
     formato: "horizontal",
     versoes: { alta: "16OM8ZvpDV4eSnGgTE03vELcN2Jph4Yui" },
-    tamanho: "33 MB"
+    tamanho: "33 MB", capa: "capas/16OM8ZvpDV4eSnGgTE03vELcN2Jph4Yui.jpg"
   },
   {
     titulo: "Trailer APS · Papel",
@@ -127,7 +128,7 @@ window.VIDEOS = [
     categoria: "APS",
     formato: "horizontal",
     versoes: { alta: "12rcGOKB6iCc_JDSPYmDhs-cciu746kUC" },
-    tamanho: "33 MB"
+    tamanho: "33 MB", capa: "capas/12rcGOKB6iCc_JDSPYmDhs-cciu746kUC.jpg"
   },
 
   // ── Zeta · Avatar ────────────────────────────────────
