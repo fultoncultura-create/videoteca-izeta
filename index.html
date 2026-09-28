@@ -481,6 +481,8 @@
       const texto = await r.text();
       const dados = JSON.parse(texto);
       if (!Array.isArray(dados.videos)) throw new Error("catálogo inválido");
+      // Planilha ainda vazia (painel nunca foi salvo): continua com o catálogo do videos.js
+      if (!dados.videos.length && !(dados.secoes || []).length) throw new Error("planilha vazia");
       if (texto !== guardado) {
         store.set("videoteca-catalogo", texto);
         aplicar(dados);
