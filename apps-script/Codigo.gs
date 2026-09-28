@@ -28,7 +28,8 @@ const CACHE_PUBLICO = 'catalogo-publico';
 /* ─────────────── Rode esta função uma vez, pelo editor ─────────────── */
 
 function configurar() {
-  if (!SENHA_INICIAL || SENHA_INICIAL === 'TROQUE-ESTA-SENHA' || SENHA_INICIAL.length < 6) {
+  // (texto montado em partes para não ser afetado por "substituir tudo" no editor)
+  if (!SENHA_INICIAL || SENHA_INICIAL === 'TROQUE' + '-ESTA-' + 'SENHA' || SENHA_INICIAL.length < 6) {
     throw new Error('Antes de rodar, troque SENHA_INICIAL no topo do código por uma senha com pelo menos 6 caracteres.');
   }
   const ss = SpreadsheetApp.getActive();
