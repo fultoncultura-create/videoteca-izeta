@@ -1,0 +1,56 @@
+/* Cores, fontes e base comuns ao site e ao painel.
+   A cor de destaque pode ser trocada no painel (Configurações); o JS preenche
+   --accent-base / --accent-dark e as cores de texto sobre ela. */
+:root {
+  color-scheme: light;
+  --bg: #eef3f4;
+  --surface: #ffffff;
+  --surface-2: #e2eaec;
+  --ink: #0f2130;
+  --muted: #566875;
+  --line: #d3dde0;
+  --accent: var(--accent-base, #0b7a75);
+  --accent-ink: var(--accent-ink-base, #ffffff);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  --danger: #b4232f;
+  --warn-bg: #fff4d6;
+  --warn-ink: #7a5300;
+  --shade: rgba(15, 33, 48, .72);
+  --shadow: 0 1px 2px rgba(15,33,48,.06), 0 8px 24px -12px rgba(15,33,48,.18);
+  --display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0b141b;
+    --surface: #122029;
+    --surface-2: #1a2b36;
+    --ink: #e4eef1;
+    --muted: #93a7b2;
+    --line: #22363f;
+    --accent: var(--accent-dark, #3cc2b5);
+    --accent-ink: var(--accent-ink-dark, #062422);
+    --danger: #ff7b85;
+    --warn-bg: #3a2e0c;
+    --warn-ink: #ffd98a;
+    --shade: rgba(3, 8, 12, .82);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b141b; --surface: #122029; --surface-2: #1a2b36; --ink: #e4eef1; --muted: #93a7b2; --line: #22363f;
+  --accent: var(--accent-dark, #3cc2b5); --accent-ink: var(--accent-ink-dark, #062422);
+  --danger: #ff7b85; --warn-bg: #3a2e0c; --warn-ink: #ffd98a;
+  --shade: rgba(3, 8, 12, .82);
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+}
+
+* { box-sizing: border-box; }
+html { padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px); background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+[hidden] { display: none !important; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

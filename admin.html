@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel da Videoteca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="tema.css">
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; }
+  h1, h2, h3 { font-family: var(--display); letter-spacing: -.01em; margin: 0; }
+
+  /* ── Botões e campos ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    height: 38px; padding: 0 14px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+    border: 1px solid var(--line); background: var(--surface); font-size: 14px; font-weight: 600; text-decoration: none;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn svg { width: 16px; height: 16px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger { color: var(--danger); }
+  .btn.danger.solid { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .btn.ghost { background: transparent; border-color: transparent; }
+  .btn.ghost:hover { background: var(--surface-2); }
+  .btn.sm { height: 32px; padding: 0 10px; font-size: 13px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+
+  label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .inp, select.inp, textarea.inp {
+    width: 100%; min-height: 40px; padding: 8px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 15px; font-weight: 400;
+  }
+  textarea.inp { min-height: 84px; resize: vertical; line-height: 1.45; }
+  .inp:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .hint { margin: 0; font-size: 12.5px; color: var(--muted); font-weight: 400; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--accent); }
+  .check b { display: block; font-weight: 600; }
+
+  /* ── Login ── */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+  .login-card {
+    width: min(100%, 380px); background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 28px; display: grid; gap: 16px; box-shadow: var(--shadow);
+  }
+  .login-card h1 { font-size: 22px; }
+  .login-card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .erro { color: var(--danger); font-size: 13.5px; margin: 0; }
+  .aviso { background: var(--warn-bg); color: var(--warn-ink); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .aviso code { font-size: 13px; }
+
+  /* ── Topo ── */
+  header.top {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-inner { display: flex; align-items: center; gap: 12px 20px; padding-block: 12px; flex-wrap: wrap; }
+  .top-inner h1 { font-size: 18px; margin-right: auto; }
+  .top-inner h1 small { font: 500 13px var(--body); color: var(--muted); margin-left: 6px; }
+  .status { font-size: 13px; color: var(--muted); }
+  .status.sujo { color: var(--warn-ink); background: var(--warn-bg); padding: 3px 9px; border-radius: 999px; font-weight: 600; }
+  nav.tabs { display: flex; gap: 4px; border-top: 1px solid var(--line); padding-block: 6px; overflow-x: auto; }
+  nav.tabs button {
+    border: 0; background: transparent; padding: 8px 14px; border-radius: 9px; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap;
+  }
+  nav.tabs button[aria-selected="true"] { color: var(--ink); background: var(--surface-2); }
+
+  main { padding-block: 22px 80px; }
+  .banner { margin-bottom: 18px; }
+
+  /* ── Vídeos ── */
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  .toolbar .inp { flex: 1 1 220px; width: auto; }
+  .toolbar select.inp { flex: 0 1 200px; }
+  .vgroup + .vgroup { margin-top: 22px; }
+  .vgroup h3 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+    margin-bottom: 8px; display: flex; gap: 8px; align-items: center;
+  }
+  .vgroup h3 small { font: 500 12px var(--body); letter-spacing: 0; text-transform: none; }
+  ul.rows {
+    list-style: none; margin: 0; padding: 0; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-height: 52px;
+  }
+  ul.rows:empty::after { content: "Arraste vídeos para esta seção"; display: block; padding: 16px; color: var(--muted); font-size: 13px; text-align: center; }
+  li.row {
+    display: grid; grid-template-columns: 28px 88px 1fr auto; gap: 12px; align-items: center;
+    padding: 8px 12px 8px 6px; cursor: pointer; background: var(--surface);
+  }
+  li.row + li.row { border-top: 1px solid var(--line); }
+  li.row:hover { background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+  li.row.ativo { background: var(--accent-soft); }
+  li.row.oculto .rt, li.row.oculto .rthumb { opacity: .5; }
+  .handle { cursor: grab; color: var(--muted); display: grid; place-items: center; height: 100%; touch-action: none; }
+  .handle svg { width: 16px; height: 16px; }
+  .sem-arrastar .handle { visibility: hidden; }
+  .rthumb { width: 88px; aspect-ratio: 16/9; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+  .rthumb img { width: 100%; height: 100%; object-fit: cover; }
+  .rt { min-width: 0; }
+  .rt strong { display: block; font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rt span { display: block; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .badge { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+  .badge.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .sortable-ghost { opacity: .35; }
+  .sortable-chosen { box-shadow: var(--shadow); }
+
+  /* ── Editor lateral ── */
+  .drawer {
+    position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: min(100%, 460px);
+    background: var(--surface); border-left: 1px solid var(--line); box-shadow: -20px 0 60px -30px rgba(0,0,0,.4);
+    display: grid; grid-template-rows: auto 1fr auto;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .drawer header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .drawer header h2 { font-size: 16px; margin-right: auto; }
+  .drawer .body { overflow-y: auto; padding: 16px; display: grid; gap: 16px; align-content: start; }
+  .drawer footer { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .capa-edit { display: grid; gap: 10px; }
+  .capa-prev { position: relative; width: 100%; border-radius: 10px; overflow: hidden; background: var(--surface-2); aspect-ratio: 16/9; }
+  .capa-prev img { width: 100%; height: 100%; object-fit: contain; }
+  .capa-prev .tag { position: absolute; left: 8px; top: 8px; font-size: 11px; font-weight: 600; background: rgba(8,18,26,.72); color: #fff; padding: 2px 8px; border-radius: 999px; }
+  .capa-acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sep { border: 0; border-top: 1px solid var(--line); margin: 2px 0; }
+  .sec-title { font: 600 12px var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .inline-link { font-size: 12.5px; color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* ── Cartões de configuração ── */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 16px; }
+  .card + .card { margin-top: 18px; }
+  .card h2 { font-size: 16px; }
+  .card > p { margin: -8px 0 0; color: var(--muted); font-size: 14px; }
+  .cor-linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .cor-linha input[type=color] { width: 48px; height: 40px; padding: 2px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; }
+  .cor-linha .inp { width: 120px; font-family: ui-monospace, monospace; }
+  .amostra { display: inline-flex; align-items: center; gap: 8px; }
+  .logo-prev { height: 56px; min-width: 56px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; padding: 6px; color: var(--muted); font-size: 12px; }
+  .logo-prev img { height: 44px; width: auto; }
+
+  /* ── Seções ── */
+  ul.slist { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  ul.slist li { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 12px 8px 6px; background: var(--surface); }
+  ul.slist li + li { border-top: 1px solid var(--line); }
+  ul.slist .cnt { font-size: 13px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .confirma { grid-column: 2 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13.5px; padding: 4px 0 2px; }
+  .confirma select { width: auto; min-height: 32px; padding: 4px 8px; }
+  .add-linha { display: flex; gap: 10px; }
+  .add-linha .inp { flex: 1; }
+
+  /* ── Sincronizar ── */
+  dialog.modal { border: 0; padding: 0; border-radius: 16px; background: var(--surface); color: var(--ink); width: min(96vw, 760px); max-height: 90vh; box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); }
+  dialog.modal::backdrop { background: var(--shade); }
+  .modal-in { display: grid; grid-template-rows: auto 1fr auto; max-height: 90vh; }
+  .modal-in > header { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+  .modal-in > header h2 { font-size: 17px; margin-right: auto; }
+  .modal-body { overflow-y: auto; padding: 16px 18px; display: grid; gap: 14px; align-content: start; }
+  .modal-in > footer { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+  .modal-in > footer .info { margin-right: auto; font-size: 13px; color: var(--muted); }
+  .novo { display: grid; grid-template-columns: 22px 96px 1fr; gap: 12px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+  .novo input[type=checkbox] { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--accent); }
+  .novo .rthumb { width: 96px; }
+  .novo .campos { display: grid; gap: 8px; min-width: 0; }
+  .novo .campos .linha { display: flex; gap: 8px; flex-wrap: wrap; }
+  .novo .campos .linha select { flex: 1 1 140px; width: auto; }
+  .novo .meta { font-size: 12.5px; color: var(--muted); }
+  .novo .meta .warn { color: var(--warn-ink); background: var(--warn-bg); padding: 1px 6px; border-radius: 6px; }
+  .vazio { text-align: center; color: var(--muted); padding: 28px 10px; font-size: 14px; }
+  .vazio strong { display: block; color: var(--ink); font: 600 16px var(--display); margin-bottom: 4px; }
+  .spinner { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: gira .8s linear infinite; margin: 0 auto 10px; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+
+  /* ── Aviso rápido ── */
+  .toast {
+    position: fixed; z-index: 50; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); translate: -50% 0;
+    background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 500;
+    box-shadow: var(--shadow); max-width: calc(100vw - 32px);
+  }
+  .toast.erro { background: var(--danger); color: #fff; }
+
+  @media (max-width: 640px) {
+    .wrap { padding-inline: 16px; }
+    li.row { grid-template-columns: 24px 64px 1fr; }
+    .rthumb { width: 64px; }
+    .badges { grid-column: 3; justify-content: flex-start; }
+    .row2 { grid-template-columns: 1fr; }
+    .novo { grid-template-columns: 22px 1fr; }
+    .novo .rthumb { display: none; }
+    .top-inner .status { order: 5; width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<section class="login" id="telaLogin">
+  <form class="login-card" id="formLogin">
+    <h1>Painel da Videoteca</h1>
+    <p>Entre com a senha para editar vídeos, seções e configurações do site.</p>
+    <div class="aviso" id="semApi" hidden>
+      O painel ainda não está ligado à planilha. Siga o passo a passo do README
+      e coloque o endereço do App da Web em <code>config.js</code>.
+    </div>
+    <label class="f">Senha
+      <input class="inp" id="senha" type="password" autocomplete="current-password" required>
+    </label>
+    <p class="erro" id="erroLogin" hidden></p>
+    <button class="btn primary" id="btnEntrar" type="submit">Entrar</button>
+    <a class="inline-link" href="./">← Voltar para o site</a>
+  </form>
+</section>
+
+<!-- ── Painel ── -->
+<div id="telaApp" hidden>
+  <header class="top">
+    <div class="wrap">
+      <div class="top-inner">
+        <h1 id="tituloPainel">Painel <small>Videoteca</small></h1>
+        <span class="status" id="status">Tudo salvo</span>
+        <a class="btn ghost" href="./" target="_blank" rel="noopener">Ver site ↗</a>
+        <button class="btn primary" id="btnSalvar" disabled>Salvar e publicar</button>
+        <button class="btn ghost" id="btnSair">Sair</button>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="videos" aria-selected="true">Vídeos</button>
+        <button role="tab" data-tab="secoes" aria-selected="false">Seções</button>
+        <button role="tab" data-tab="config" aria-selected="false">Configurações</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="aviso banner" id="bannerImport" hidden>
+      A planilha estava vazia, então carreguei o catálogo atual do site (<span id="nImport"></span> vídeos).
+      Revise se quiser e clique em <b>Salvar e publicar</b> para gravar.
+    </div>
+
+    <!-- Vídeos -->
+    <section id="tab-videos">
+      <div class="toolbar">
+        <input class="inp" id="busca" type="search" placeholder="Buscar vídeo…" aria-label="Buscar vídeo">
+        <select class="inp" id="filtroSecao" aria-label="Filtrar por seção"></select>
+        <button class="btn primary" id="btnSync">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9M18 3v4h-4M6 21v-4h4"/></svg>
+          Sincronizar com o Drive
+        </button>
+      </div>
+      <p class="hint" id="dicaArrastar" style="margin:-8px 0 14px">Arraste pelo <b>⋮⋮</b> para mudar a ordem ou levar o vídeo para outra seção. Clique no vídeo para editar.</p>
+      <div id="vlist"></div>
+    </section>
+
+    <!-- Seções -->
+    <section id="tab-secoes" hidden>
+      <div class="card">
+        <h2>Seções do menu</h2>
+        <p>Arraste para mudar a ordem em que aparecem no site. Seções sem vídeos visíveis não aparecem para o público.</p>
+        <ul class="slist" id="slist"></ul>
+        <form class="add-linha" id="formSecao">
+          <input class="inp" id="novaSecao" placeholder="Nome da nova seção" required>
+          <button class="btn" type="submit">Adicionar seção</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Configurações -->
+    <section id="tab-config" hidden>
+      <div class="card">
+        <h2>Aparência do site</h2>
+        <label class="f">Nome do site
+          <input class="inp" id="cNome" maxlength="60">
+          <span class="hint">A última palavra aparece na cor de destaque.</span>
+        </label>
+        <label class="f">Subtítulo
+          <input class="inp" id="cSub" maxlength="120" placeholder="Opcional. Ex.: Vídeos institucionais e de treinamento">
+        </label>
+        <div class="f">Logo
+          <div class="capa-acoes" style="align-items:center">
+            <div class="logo-prev" id="cLogoPrev">Sem logo</div>
+            <label class="btn sm">Enviar imagem<input type="file" id="cLogoArq" accept="image/*" hidden></label>
+            <button class="btn sm ghost" id="cLogoTirar" type="button">Remover logo</button>
+          </div>
+          <span class="hint">PNG com fundo transparente fica melhor. Aparece ao lado do nome.</span>
+        </div>
+        <div class="f">Cor de destaque
+          <div class="cor-linha">
+            <input type="color" id="cCor" aria-label="Escolher cor">
+            <input class="inp" id="cCorHex" maxlength="7" aria-label="Código da cor">
+            <span class="amostra"><span class="btn primary sm" style="pointer-events:none">Exemplo de botão</span></span>
+            <button class="btn sm ghost" id="cCorPadrao" type="button">Voltar à cor padrão</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Downloads</h2>
+        <label class="check">
+          <input type="checkbox" id="cDownload">
+          <span><b>Mostrar o botão “Baixar vídeo” no player</b>
+            <span class="hint">Vale para todos os vídeos, exceto os que tiverem uma regra própria no editor do vídeo.</span></span>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>Google Drive</h2>
+        <label class="f">Pasta principal dos vídeos
+          <input class="inp" id="cPasta" placeholder="Link ou ID da pasta">
+          <span class="hint">O botão “Sincronizar com o Drive” procura vídeos nesta pasta e em todas as subpastas.</span>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>Senha do painel</h2>
+        <p>Esta troca vale na hora e não depende do botão Salvar.</p>
+        <div class="row2">
+          <label class="f">Nova senha <input class="inp" id="sNova" type="password" autocomplete="new-password" minlength="6"></label>
+          <label class="f">Repita a nova senha <input class="inp" id="sRepete" type="password" autocomplete="new-password" minlength="6"></label>
+        </div>
+        <div><button class="btn" id="btnSenha" type="button">Trocar senha</button></div>
+        <p class="hint" id="msgSenha" hidden></p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ── Editor de vídeo ── -->
+<aside class="drawer" id="drawer" hidden aria-labelledby="eCab">
+  <header>
+    <h2 id="eCab">Editar vídeo</h2>
+    <button class="btn ghost sm" id="eFechar" aria-label="Fechar editor">Fechar ✕</button>
+  </header>
+  <div class="body">
+    <label class="f">Título <input class="inp" id="eTitulo" maxlength="120"></label>
+    <label class="f">Descrição <textarea class="inp" id="eDesc" maxlength="400"></textarea></label>
+    <div class="row2">
+      <label class="f">Seção <select class="inp" id="eSecao"></select></label>
+      <label class="f">Formato
+        <select class="inp" id="eFormato">
+          <option value="horizontal">Horizontal 16:9</option>
+          <option value="vertical">Vertical 9:16</option>
+          <option value="quadrado">Feed 4:5</option>
+        </select>
+      </label>
+    </div>
+
+    <hr class="sep">
+    <div class="sec-title">Capa</div>
+    <div class="capa-edit">
+      <div class="capa-prev"><img id="eCapaImg" alt=""><span class="tag" id="eCapaTag"></span></div>
+      <div class="capa-acoes">
+        <label class="btn sm">Enviar imagem<input type="file" id="eCapaArq" accept="image/*" hidden></label>
+        <button class="btn sm ghost" id="eCapaAuto" type="button">Usar capa automática do Drive</button>
+      </div>
+      <label class="f">Ou cole o link de uma imagem do Drive
+        <input class="inp" id="eCapa" placeholder="https://drive.google.com/file/d/…">
+      </label>
+    </div>
+
+    <hr class="sep">
+    <div class="sec-title">Arquivos do vídeo no Drive</div>
+    <label class="f">Alta qualidade (original) <input class="inp" id="eAlta" placeholder="Link ou ID do arquivo"></label>
+    <div class="row2">
+      <label class="f">Média (opcional) <input class="inp" id="eMedia" placeholder="Link ou ID"></label>
+      <label class="f">Baixa (opcional) <input class="inp" id="eBaixa" placeholder="Link ou ID"></label>
+    </div>
+    <label class="f">Tamanho do arquivo original <input class="inp" id="eTamanho" placeholder="Ex.: 315 MB"></label>
+    <a class="inline-link" id="eTestar" target="_blank" rel="noopener">Abrir o arquivo no Drive ↗</a>
+
+    <hr class="sep">
+    <div class="sec-title">Publicação</div>
+    <label class="f">Botão “Baixar vídeo”
+      <select class="inp" id="eDownload">
+        <option value="">Seguir a configuração do site</option>
+        <option value="sim">Sempre mostrar neste vídeo</option>
+        <option value="nao">Nunca mostrar neste vídeo</option>
+      </select>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="eVisivel">
+      <span><b>Visível no site</b><span class="hint">Desmarque para esconder sem apagar.</span></span>
+    </label>
+  </div>
+  <footer>
+    <button class="btn danger" id="eRemover" type="button">Remover do menu</button>
+    <span id="eConfirma" hidden>
+      <span class="hint">O arquivo continua no Drive.</span>
+      <button class="btn danger solid sm" id="eRemoverSim" type="button">Remover</button>
+      <button class="btn sm" id="eRemoverNao" type="button">Cancelar</button>
+    </span>
+  </footer>
+</aside>
+
+<!-- ── Sincronizar ── -->
+<dialog class="modal" id="dSync" aria-labelledby="syncTitulo">
+  <div class="modal-in">
+    <header>
+      <h2 id="syncTitulo">Sincronizar com o Drive</h2>
+      <button class="btn ghost sm" id="syncFechar" aria-label="Fechar">Fechar ✕</button>
+    </header>
+    <div class="modal-body" id="syncCorpo"></div>
+    <footer>
+      <span class="info" id="syncInfo"></span>
+      <button class="btn primary" id="syncAdd" disabled>Adicionar selecionados</button>
+    </footer>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script src="config.js"></script>
+<script src="videos.js"></script>
+<script src="comum.js"></script>
+<script>
+(() => {
+  const { CONFIG_PADRAO, esc, norm, idDoDrive, urlImagem, capaDoVideo, formatarBytes, aplicarCor, doArquivoLocal } = window.Videoteca;
+  const API = window.VIDEOTECA_API;
+  const $ = s => document.querySelector(s);
+  const ICONE_ARRASTAR = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>`;
+
+  let senha = "";
+  let dados = null;          // { config, secoes, videos }
+  let sujo = false;
+  let editandoId = null;
+  const previas = {};        // imagens enviadas nesta sessão, para mostrar antes do Drive gerar a miniatura
+  let ordenadores = [];
+
+  // ── Utilidades ──
+  function toast(msg, erro = false) {
+    const t = $("#toast");
+    t.textContent = msg; t.className = "toast" + (erro ? " erro" : ""); t.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, erro ? 6000 : 3500);
+  }
+  async function api(acao, extra = {}) {
+    let r;
+    try {
+      r = await fetch(API, { method: "POST", body: JSON.stringify({ acao, senha, ...extra }) });
+    } catch {
+      throw new Error("Sem conexão com a planilha. Verifique a internet e tente de novo.");
+    }
+    const j = await r.json().catch(() => ({ erro: "Resposta inesperada do servidor." }));
+    if (j.erro) throw new Error(j.erro);
+    return j;
+  }
+  const porId = id => dados.videos.find(v => v.id === id);
+  const nomeSecao = id => (dados.secoes.find(s => s.id === id) || {}).nome || "Sem seção";
+  const novoIdSecao = nome => {
+    let base = "s-" + norm(nome).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "s-secao";
+    let id = base, n = 2;
+    while (dados.secoes.some(s => s.id === id)) id = base + "-" + n++;
+    return id;
+  };
+  const imgPrevia = v => previas[v.capa] || capaDoVideo(v, 320);
+
+  function marcarSujo() {
+    sujo = true;
+    const s = $("#status");
+    s.textContent = "Alterações não salvas"; s.className = "status sujo";
+    $("#btnSalvar").disabled = false;
+  }
+  function marcarSalvo(quando) {
+    sujo = false;
+    const s = $("#status");
+    s.textContent = quando ? "Salvo às " + quando.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "Tudo salvo";
+    s.className = "status";
+    $("#btnSalvar").disabled = true;
+  }
+  window.addEventListener("beforeunload", e => { if (sujo) { e.preventDefault(); e.returnValue = ""; } });
+
+  // Reduz a imagem antes de enviar (capas e logo)
+  async function prepararImagem(arquivo, max = 1280) {
+    const url = URL.createObjectURL(arquivo);
+    try {
+      const img = new Image();
+      await new Promise((ok, erro) => { img.onload = ok; img.onerror = () => erro(new Error("Não consegui abrir essa imagem.")); img.src = url; });
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const tipo = arquivo.type === "image/png" ? "image/png" : "image/jpeg";
+      const dataUrl = c.toDataURL(tipo, .88);
+      return { dataUrl, tipo, base64: dataUrl.split(",")[1] };
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function enviarImagem(arquivo, nome) {
+    const p = await prepararImagem(arquivo);
+    const r = await api("enviarImagem", { base64: p.base64, tipo: p.tipo, nome });
+    previas[r.id] = p.dataUrl;
+    return r.id;
+  }
+
+  // ── Login ──
+  if (!API) { $("#semApi").hidden = false; $("#btnEntrar").disabled = true; }
+  $("#formLogin").addEventListener("submit", async e => {
+    e.preventDefault();
+    const erro = $("#erroLogin"); erro.hidden = true;
+    const b = $("#btnEntrar"); b.disabled = true; b.textContent = "Entrando…";
+    senha = $("#senha").value;
+    try {
+      await api("entrar");
+      try { sessionStorage.setItem("vt-senha", senha); } catch {}
+      await abrirPainel();
+    } catch (err) {
+      erro.textContent = err.message; erro.hidden = false;
+    } finally { b.disabled = false; b.textContent = "Entrar"; }
+  });
+  $("#btnSair").addEventListener("click", () => {
+    if (sujo && !$("#btnSair").dataset.confirmar) {
+      $("#btnSair").dataset.confirmar = "1"; $("#btnSair").textContent = "Sair sem salvar?";
+      setTimeout(() => { delete $("#btnSair").dataset.confirmar; $("#btnSair").textContent = "Sair"; }, 4000);
+      return;
+    }
+    try { sessionStorage.removeItem("vt-senha"); } catch {}
+    sujo = false; location.reload();
+  });
+
+  async function abrirPainel() {
+    const d = await api("carregar");
+    const vazio = !d.videos.length && !d.secoes.length;
+    if (vazio) {
+      dados = doArquivoLocal();
+      $("#nImport").textContent = dados.videos.length;
+      $("#bannerImport").hidden = false;
+    } else {
+      dados = { config: { ...CONFIG_PADRAO, ...d.config }, secoes: d.secoes, videos: d.videos };
+    }
+    $("#telaLogin").hidden = true;
+    $("#telaApp").hidden = false;
+    aplicarCor(dados.config.cor);
+    renderTudo();
+    if (vazio) marcarSujo(); else marcarSalvo();
+  }
+
+  // ── Salvar ──
+  async function salvar() {
+    if (!sujo) return;
+    const b = $("#btnSalvar"); b.disabled = true; b.textContent = "Salvando…";
+    try {
+      await api("salvar", { dados });
+      marcarSalvo(new Date());
+      $("#bannerImport").hidden = true;
+      toast("Salvo. O site já mostra as mudanças.");
+    } catch (err) {
+      toast(err.message, true); b.disabled = false;
+    } finally { b.textContent = "Salvar e publicar"; }
+  }
+  $("#btnSalvar").addEventListener("click", salvar);
+  document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s" && dados) { e.preventDefault(); salvar(); }
+  });
+
+  // ── Abas ──
+  document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x === b));
+    ["videos", "secoes", "config"].forEach(t => $("#tab-" + t).hidden = t !== b.dataset.tab);
+    fecharEditor();
+  }));
+
+  function renderTudo() { renderFiltro(); renderVideos(); renderSecoes(); renderConfig(); }
+
+  // ── Aba Vídeos ──
+  function renderFiltro() {
+    const f = $("#filtroSecao"), atual = f.value;
+    f.innerHTML = `<option value="">Todas as seções</option>` +
+      dados.secoes.map(s => `<option value="${esc(s.id)}">${esc(s.nome)}</option>`).join("");
+    f.value = dados.secoes.some(s => s.id === atual) ? atual : "";
+  }
+  $("#busca").addEventListener("input", renderVideos);
+  $("#filtroSecao").addEventListener("change", renderVideos);
+
+  function badges(v) {
+    const b = [];
+    if (v.oculto === "sim") b.push(`<span class="badge warn">Oculto</span>`);
+    if (v.download === "sim") b.push(`<span class="badge">Download sempre</span>`);
+    if (v.download === "nao") b.push(`<span class="badge">Sem download</span>`);
+    if (v.media || v.baixa) b.push(`<span class="badge">${[v.media && "Média", v.baixa && "Baixa"].filter(Boolean).join(" + ")}</span>`);
+    return b.join("");
+  }
+  function linhaVideo(v) {
+    return `<li class="row${v.oculto === "sim" ? " oculto" : ""}${v.id === editandoId ? " ativo" : ""}" data-id="${esc(v.id)}">
+      <span class="handle" title="Arrastar">${ICONE_ARRASTAR}</span>
+      <span class="rthumb"><img src="${esc(imgPrevia(v))}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>
+      <span class="rt"><strong>${esc(v.titulo || "Sem título")}</strong><span>${esc(v.descricao || "Sem descrição")}</span></span>
+      <span class="badges">${badges(v)}</span>
+    </li>`;
+  }
+
+  function renderVideos() {
+    ordenadores.forEach(o => o.destroy()); ordenadores = [];
+    const termos = norm($("#busca").value).split(/\s+/).filter(Boolean);
+    const filtro = $("#filtroSecao").value;
+    const filtrando = termos.length > 0 || !!filtro;
+    const combina = v => termos.every(t => norm(`${v.titulo} ${v.descricao}`).includes(t));
+
+    const grupos = dados.secoes.map(s => ({ id: s.id, nome: s.nome }));
+    if (dados.videos.some(v => !dados.secoes.some(s => s.id === v.secao))) grupos.push({ id: "", nome: "Sem seção" });
+
+    const html = grupos
+      .filter(g => !filtro || g.id === filtro)
+      .map(g => {
+        const daSecao = dados.videos.filter(v => (dados.secoes.some(s => s.id === v.secao) ? v.secao : "") === g.id);
+        const itens = daSecao.filter(combina);
+        if (filtrando && !itens.length) return "";
+        const total = daSecao.length;
+        return `<section class="vgroup"><h3>${esc(g.nome)} <small>${total} ${total === 1 ? "vídeo" : "vídeos"}</small></h3>
+          <ul class="rows${filtrando ? " sem-arrastar" : ""}" data-secao="${esc(g.id)}">${itens.map(linhaVideo).join("")}</ul></section>`;
+      }).join("");
+
+    $("#vlist").innerHTML = html || `<div class="vazio"><strong>Nenhum vídeo encontrado</strong>Tente outra busca ou escolha “Todas as seções”.</div>`;
+    $("#dicaArrastar").hidden = filtrando;
+
+    if (!filtrando && window.Sortable) {
+      document.querySelectorAll("#vlist ul.rows").forEach(ul => {
+        ordenadores.push(Sortable.create(ul, {
+          group: "videos", handle: ".handle", animation: 150,
+          onEnd: () => { lerOrdemDaTela(); marcarSujo(); renderVideos(); }
+        }));
+      });
+    }
+  }
+
+  function lerOrdemDaTela() {
+    const nova = [];
+    document.querySelectorAll("#vlist ul.rows").forEach(ul => {
+      ul.querySelectorAll("li.row").forEach(li => {
+        const v = porId(li.dataset.id);
+        if (v) { v.secao = ul.dataset.secao; nova.push(v); }
+      });
+    });
+    dados.videos.forEach(v => { if (!nova.includes(v)) nova.push(v); });
+    dados.videos = nova;
+  }
+
+  $("#vlist").addEventListener("click", e => {
+    if (e.target.closest(".handle")) return;
+    const li = e.target.closest("li.row"); if (li) abrirEditor(li.dataset.id);
+  });
+
+  // ── Editor ──
+  function abrirEditor(id) {
+    const v = porId(id); if (!v) return;
+    editandoId = id;
+    $("#eSecao").innerHTML = dados.secoes.map(s => `<option value="${esc(s.id)}">${esc(s.nome)}</option>`).join("") +
+      (dados.secoes.some(s => s.id === v.secao) ? "" : `<option value="">Sem seção</option>`);
+    $("#eTitulo").value = v.titulo || "";
+    $("#eDesc").value = v.descricao || "";
+    $("#eSecao").value = dados.secoes.some(s => s.id === v.secao) ? v.secao : "";
+    $("#eFormato").value = v.formato || "horizontal";
+    $("#eCapa").value = v.capa && !String(v.capa).includes("/") ? v.capa : "";
+    $("#eAlta").value = v.alta || "";
+    $("#eMedia").value = v.media || "";
+    $("#eBaixa").value = v.baixa || "";
+    $("#eTamanho").value = v.tamanho || "";
+    $("#eDownload").value = v.download || "";
+    $("#eVisivel").checked = v.oculto !== "sim";
+    $("#eConfirma").hidden = true; $("#eRemover").hidden = false;
+    atualizarCapaEditor(v);
+    $("#drawer").hidden = false;
+    document.querySelectorAll("li.row").forEach(li => li.classList.toggle("ativo", li.dataset.id === id));
+  }
+  function fecharEditor() {
+    editandoId = null; $("#drawer").hidden = true;
+    document.querySelectorAll("li.row.ativo").forEach(li => li.classList.remove("ativo"));
+  }
+  function atualizarCapaEditor(v) {
+    const img = $("#eCapaImg");
+    img.src = imgPrevia(v);
+    $(".capa-prev").style.aspectRatio = v.formato === "vertical" ? "16 / 12" : "16 / 9";
+    $("#eCapaTag").textContent = v.capa ? "Capa personalizada" : "Capa automática do Drive";
+    $("#eTestar").href = v.alta ? `https://drive.google.com/file/d/${v.alta}/view` : "#";
+  }
+  $("#eFechar").addEventListener("click", fecharEditor);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#drawer").hidden && !$("#dSync").open) fecharEditor(); });
+
+  function editar(campo, valor) {
+    const v = porId(editandoId); if (!v) return;
+    v[campo] = valor;
+    marcarSujo();
+    atualizarCapaEditor(v);
+    renderVideos();
+  }
+  $("#eTitulo").addEventListener("input", e => editar("titulo", e.target.value));
+  $("#eDesc").addEventListener("input", e => editar("descricao", e.target.value));
+  $("#eSecao").addEventListener("change", e => editar("secao", e.target.value));
+  $("#eFormato").addEventListener("change", e => editar("formato", e.target.value));
+  $("#eTamanho").addEventListener("input", e => editar("tamanho", e.target.value));
+  $("#eDownload").addEventListener("change", e => editar("download", e.target.value));
+  $("#eVisivel").addEventListener("change", e => editar("oculto", e.target.checked ? "" : "sim"));
+  ["alta", "media", "baixa"].forEach(q => {
+    const el = $("#e" + q[0].toUpperCase() + q.slice(1));
+    el.addEventListener("change", () => {
+      const id = idDoDrive(el.value);
+      if (el.value.trim() && !id) { toast("Não reconheci esse link do Drive.", true); return; }
+      if (q === "alta" && !id) { toast("O arquivo em alta qualidade é obrigatório.", true); el.value = porId(editandoId).alta; return; }
+      el.value = id;
+      editar(q, id);
+    });
+  });
+  $("#eCapa").addEventListener("change", e => {
+    const val = e.target.value.trim();
+    const id = idDoDrive(val);
+    if (val && !id) { toast("Não reconheci esse link do Drive.", true); return; }
+    e.target.value = id;
+    editar("capa", id);
+  });
+  $("#eCapaAuto").addEventListener("click", () => { $("#eCapa").value = ""; editar("capa", ""); });
+  $("#eCapaArq").addEventListener("change", async e => {
+    const arq = e.target.files[0]; e.target.value = "";
+    if (!arq) return;
+    const v = porId(editandoId);
+    toast("Enviando capa…");
+    try {
+      const id = await enviarImagem(arq, `capa - ${v.titulo || v.id}.jpg`);
+      $("#eCapa").value = id;
+      editar("capa", id);
+      toast("Capa enviada. Clique em Salvar e publicar.");
+    } catch (err) { toast(err.message, true); }
+  });
+
+  $("#eRemover").addEventListener("click", () => { $("#eRemover").hidden = true; $("#eConfirma").hidden = false; });
+  $("#eRemoverNao").addEventListener("click", () => { $("#eRemover").hidden = false; $("#eConfirma").hidden = true; });
+  $("#eRemoverSim").addEventListener("click", () => {
+    const v = porId(editandoId);
+    dados.videos = dados.videos.filter(x => x !== v);
+    fecharEditor(); marcarSujo(); renderVideos(); renderSecoes();
+    toast(`“${v.titulo}” saiu do menu.`);
+  });
+
+  // ── Aba Seções ──
+  let secaoConfirmando = null;
+  function renderSecoes() {
+    const ul = $("#slist");
+    ul.innerHTML = dados.secoes.map(s => {
+      const n = dados.videos.filter(v => v.secao === s.id).length;
+      const outras = dados.secoes.filter(x => x.id !== s.id);
+      const confirma = secaoConfirmando === s.id ? `<div class="confirma">${
+        n && outras.length
+          ? `Mover ${n === 1 ? "o vídeo" : `os ${n} vídeos`} para<select class="inp" data-mover>${outras.map(o => `<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join("")}</select> e excluir a seção?`
+          : n ? `Esta seção tem ${n} vídeos e não há outra seção para recebê-los. Crie outra seção antes.`
+              : `Excluir a seção “${esc(s.nome)}”?`
+      } ${n && !outras.length ? "" : `<button class="btn danger solid sm" data-excluir-sim>Excluir</button>`}
+        <button class="btn sm" data-excluir-nao>Cancelar</button></div>` : "";
+      return `<li data-id="${esc(s.id)}">
+        <span class="handle" title="Arrastar">${ICONE_ARRASTAR}</span>
+        <input class="inp" value="${esc(s.nome)}" aria-label="Nome da seção" data-nome>
+        <span class="cnt">${n} ${n === 1 ? "vídeo" : "vídeos"}</span>
+        <button class="btn sm ghost danger" data-excluir>Excluir</button>
+        ${confirma}
+      </li>`;
+    }).join("");
+    if (window.Sortable) {
+      if (renderSecoes.s) renderSecoes.s.destroy();
+      renderSecoes.s = Sortable.create(ul, {
+        handle: ".handle", animation: 150,
+        onEnd: () => {
+          const ordem = [...ul.children].map(li => li.dataset.id);
+          dados.secoes.sort((a, b) => ordem.indexOf(a.id) - ordem.indexOf(b.id));
+          marcarSujo(); renderFiltro(); renderVideos();
+        }
+      });
+    }
+  }
+  $("#slist").addEventListener("change", e => {
+    if (!e.target.matches("[data-nome]")) return;
+    const s = dados.secoes.find(x => x.id === e.target.closest("li").dataset.id);
+    const nome = e.target.value.trim();
+    if (!nome) { e.target.value = s.nome; return; }
+    s.nome = nome; marcarSujo(); renderFiltro(); renderVideos();
+  });
+  $("#slist").addEventListener("click", e => {
+    const li = e.target.closest("li"); if (!li) return;
+    const id = li.dataset.id;
+    if (e.target.closest("[data-excluir]")) { secaoConfirmando = id; renderSecoes(); }
+    else if (e.target.closest("[data-excluir-nao]")) { secaoConfirmando = null; renderSecoes(); }
+    else if (e.target.closest("[data-excluir-sim]")) {
+      const destino = li.querySelector("[data-mover]")?.value;
+      dados.videos.forEach(v => { if (v.secao === id) v.secao = destino; });
+      dados.secoes = dados.secoes.filter(s => s.id !== id);
+      secaoConfirmando = null; marcarSujo(); renderTudo();
+    }
+  });
+  $("#formSecao").addEventListener("submit", e => {
+    e.preventDefault();
+    const nome = $("#novaSecao").value.trim(); if (!nome) return;
+    dados.secoes.push({ id: novoIdSecao(nome), nome });
+    $("#novaSecao").value = "";
+    marcarSujo(); renderTudo();
+    toast(`Seção “${nome}” criada.`);
+  });
+
+  // ── Aba Configurações ──
+  function renderConfig() {
+    const c = dados.config;
+    $("#cNome").value = c.nomeSite || "";
+    $("#cSub").value = c.subtitulo || "";
+    $("#cCor").value = /^#[0-9a-f]{6}$/i.test(c.cor || "") ? c.cor : CONFIG_PADRAO.cor;
+    $("#cCorHex").value = $("#cCor").value;
+    $("#cDownload").checked = c.downloadAtivo !== "nao";
+    $("#cPasta").value = c.pastaDrive || "";
+    const prev = $("#cLogoPrev");
+    prev.innerHTML = c.logo ? `<img src="${esc(previas[c.logo] || urlImagem(c.logo, 320))}" alt="Logo atual">` : "Sem logo";
+    $("#tituloPainel").innerHTML = `Painel <small>${esc(c.nomeSite || "Videoteca")}</small>`;
+  }
+  function config(campo, valor) { dados.config[campo] = valor; marcarSujo(); }
+  $("#cNome").addEventListener("input", e => { config("nomeSite", e.target.value); $("#tituloPainel small").textContent = e.target.value; });
+  $("#cSub").addEventListener("input", e => config("subtitulo", e.target.value));
+  $("#cDownload").addEventListener("change", e => config("downloadAtivo", e.target.checked ? "sim" : "nao"));
+  $("#cPasta").addEventListener("change", e => {
+    const id = idDoDrive(e.target.value);
+    if (e.target.value.trim() && !id) { toast("Não reconheci esse link de pasta do Drive.", true); return; }
+    e.target.value = id; config("pastaDrive", id);
+  });
+  function definirCor(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
+    $("#cCor").value = hex; $("#cCorHex").value = hex;
+    aplicarCor(hex); config("cor", hex);
+  }
+  $("#cCor").addEventListener("input", e => definirCor(e.target.value));
+  $("#cCorHex").addEventListener("change", e => {
+    let v = e.target.value.trim(); if (!v.startsWith("#")) v = "#" + v;
+    if (/^#[0-9a-f]{6}$/i.test(v)) definirCor(v.toLowerCase());
+    else { toast("Use o formato #RRGGBB, por exemplo #0b7a75.", true); e.target.value = dados.config.cor; }
+  });
+  $("#cCorPadrao").addEventListener("click", () => definirCor(CONFIG_PADRAO.cor));
+  $("#cLogoArq").addEventListener("change", async e => {
+    const arq = e.target.files[0]; e.target.value = "";
+    if (!arq) return;
+    toast("Enviando logo…");
+    try {
+      const id = await enviarImagem(arq, "logo da videoteca.png");
+      config("logo", id); renderConfig();
+      toast("Logo enviado. Clique em Salvar e publicar.");
+    } catch (err) { toast(err.message, true); }
+  });
+  $("#cLogoTirar").addEventListener("click", () => { config("logo", ""); renderConfig(); });
+  $("#btnSenha").addEventListener("click", async () => {
+    const msg = $("#msgSenha"), a = $("#sNova").value, b = $("#sRepete").value;
+    msg.hidden = false; msg.style.color = "var(--danger)";
+    if (a.length < 6) { msg.textContent = "A senha precisa ter pelo menos 6 caracteres."; return; }
+    if (a !== b) { msg.textContent = "As duas senhas não são iguais."; return; }
+    try {
+      await api("trocarSenha", { novaSenha: a });
+      senha = a; try { sessionStorage.setItem("vt-senha", a); } catch {}
+      $("#sNova").value = $("#sRepete").value = "";
+      msg.style.color = ""; msg.textContent = "Senha trocada. Use a nova senha no próximo acesso.";
+    } catch (err) { msg.textContent = err.message; }
+  });
+
+  // ── Sincronizar com o Drive ──
+  let achados = [];
+  const tituloDoArquivo = nome => String(nome).replace(/\.[a-z0-9]{2,4}$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
+  function palpiteSecao(pasta) {
+    const ultima = norm(String(pasta || "").split(" / ").pop()).replace(/[^a-z0-9]/g, "");
+    const s = ultima && dados.secoes.find(x => norm(x.nome).replace(/[^a-z0-9]/g, "") === ultima);
+    return s ? s.id : (dados.secoes[0] || {}).id || "";
+  }
+  function detectarFormato(img, idx) {
+    const r = img.naturalWidth / img.naturalHeight;
+    const f = r > 1.2 ? "horizontal" : r < .7 ? "vertical" : "quadrado";
+    const sel = document.querySelector(`[data-formato="${idx}"]`);
+    if (sel && !sel.dataset.mexeu) sel.value = f;
+  }
+  window.__detectarFormato = detectarFormato;
+
+  function renderSync(res) {
+    achados = res.novos.map(a => ({ ...a, titulo: tituloDoArquivo(a.nome), secao: palpiteSecao(a.pasta) }));
+    const opcoesSecao = sel => dados.secoes.map(s => `<option value="${esc(s.id)}"${s.id === sel ? " selected" : ""}>${esc(s.nome)}</option>`).join("");
+    let html = "";
+    if (!achados.length) {
+      html += `<div class="vazio"><strong>Nenhum vídeo novo</strong>Os ${res.total} vídeos da pasta já estão no menu.</div>`;
+    } else {
+      html += `<p class="hint" style="font-size:14px">Encontrei <b>${achados.length}</b> ${achados.length === 1 ? "vídeo novo" : "vídeos novos"} na pasta do Drive. Ajuste o título e a seção e clique em Adicionar.</p>`;
+      html += achados.map((a, i) => `
+        <div class="novo">
+          <input type="checkbox" checked data-marcar="${i}" aria-label="Adicionar ${esc(a.titulo)}">
+          <span class="rthumb"><img src="${esc(urlImagem(a.id, 320))}" alt="" referrerpolicy="no-referrer" onload="__detectarFormato(this, ${i})"></span>
+          <div class="campos">
+            <input class="inp" value="${esc(a.titulo)}" data-titulo="${i}" aria-label="Título">
+            <div class="linha">
+              <select class="inp" data-secao="${i}" aria-label="Seção">${opcoesSecao(a.secao)}</select>
+              <select class="inp" data-formato="${i}" aria-label="Formato">
+                <option value="horizontal">Horizontal 16:9</option><option value="vertical">Vertical 9:16</option><option value="quadrado">Feed 4:5</option>
+              </select>
+            </div>
+            <div class="meta">${esc(a.pasta || "Pasta principal")} · ${formatarBytes(a.tamanho) || "tamanho desconhecido"}
+              ${a.publico ? "" : ` · <span class="warn">vai ser compartilhado como “qualquer pessoa com o link”</span>`}</div>
+          </div>
+        </div>`).join("");
+    }
+    if (res.ausentes && res.ausentes.length) {
+      html += `<div class="aviso"><b>${res.ausentes.length} ${res.ausentes.length === 1 ? "vídeo do menu não foi encontrado" : "vídeos do menu não foram encontrados"} nesta pasta:</b>
+        ${res.ausentes.map(a => esc(a.titulo)).join(", ")}.
+        Se o arquivo foi apagado, remova o vídeo do menu. Se ele está em outra pasta, pode ignorar este aviso.</div>`;
+    }
+    html += `<hr class="sep"><form class="add-linha" id="formLink">
+      <input class="inp" id="linkNovo" placeholder="Ou cole o link de um vídeo do Drive que está em outra pasta">
+      <button class="btn" type="submit">Adicionar</button></form>`;
+    $("#syncCorpo").innerHTML = html;
+    atualizarContagemSync();
+  }
+  function atualizarContagemSync() {
+    const n = document.querySelectorAll("#syncCorpo [data-marcar]:checked").length;
+    $("#syncAdd").disabled = !n;
+    $("#syncAdd").textContent = n > 1 ? `Adicionar ${n} vídeos` : "Adicionar selecionados";
+    $("#syncInfo").textContent = achados.length ? `${n} de ${achados.length} selecionados` : "";
+  }
+
+  $("#btnSync").addEventListener("click", async () => {
+    $("#syncCorpo").innerHTML = `<div class="vazio"><div class="spinner"></div>Procurando vídeos na pasta do Drive…</div>`;
+    $("#syncAdd").disabled = true; $("#syncInfo").textContent = "";
+    $("#dSync").showModal();
+    try {
+      const { arquivos } = await api("sincronizar");
+      const cadastrados = new Set(dados.videos.flatMap(v => [v.alta, v.media, v.baixa].filter(Boolean)));
+      const noDrive = new Set(arquivos.map(a => a.id));
+      renderSync({
+        total: arquivos.length,
+        novos: arquivos.filter(a => !cadastrados.has(a.id)),
+        ausentes: dados.videos.filter(v => v.alta && !noDrive.has(v.alta))
+      });
+    }
+    catch (err) { $("#syncCorpo").innerHTML = `<div class="vazio"><strong>Não consegui ler o Drive</strong>${esc(err.message)}</div>`; }
+  });
+  $("#syncFechar").addEventListener("click", () => $("#dSync").close());
+  $("#syncCorpo").addEventListener("change", e => {
+    if (e.target.matches("[data-marcar]")) atualizarContagemSync();
+    if (e.target.matches("[data-formato]")) e.target.dataset.mexeu = "1";
+  });
+
+  function incluirVideo(v) {
+    // entra no fim da própria seção
+    let pos = -1;
+    dados.videos.forEach((x, i) => { if (x.secao === v.secao) pos = i; });
+    if (pos === -1) dados.videos.push(v); else dados.videos.splice(pos + 1, 0, v);
+  }
+  function videoNovo(a, titulo, secao, formato) {
+    return { id: a.id, titulo, descricao: "", secao, formato, alta: a.id, media: "", baixa: "",
+             tamanho: formatarBytes(a.tamanho), capa: "", oculto: "", download: "" };
+  }
+
+  $("#syncAdd").addEventListener("click", async () => {
+    const escolhidos = [...document.querySelectorAll("#syncCorpo [data-marcar]:checked")].map(c => +c.dataset.marcar);
+    const privados = [];
+    escolhidos.forEach(i => {
+      const a = achados[i];
+      const titulo = document.querySelector(`[data-titulo="${i}"]`).value.trim() || tituloDoArquivo(a.nome);
+      const secao = document.querySelector(`[data-secao="${i}"]`).value;
+      const formato = document.querySelector(`[data-formato="${i}"]`).value;
+      incluirVideo(videoNovo(a, titulo, secao, formato));
+      if (!a.publico) privados.push(a.id);
+    });
+    $("#dSync").close();
+    marcarSujo(); renderVideos(); renderSecoes();
+    let msg = `${escolhidos.length} ${escolhidos.length === 1 ? "vídeo adicionado" : "vídeos adicionados"}. Clique em Salvar e publicar.`;
+    if (privados.length) {
+      try {
+        const r = await api("compartilhar", { ids: privados });
+        if (r.falhas.length) msg += ` Não consegui compartilhar ${r.falhas.length} arquivo(s); faça isso no Drive.`;
+      } catch (err) { msg += " " + err.message; }
+    }
+    toast(msg);
+  });
+
+  document.addEventListener("submit", async e => {
+    if (e.target.id !== "formLink") return;
+    e.preventDefault();
+    const campo = $("#linkNovo");
+    const id = idDoDrive(campo.value);
+    if (!id) { toast("Não reconheci esse link do Drive.", true); return; }
+    if (dados.videos.some(v => v.alta === id || v.media === id || v.baixa === id)) { toast("Esse vídeo já está no menu.", true); return; }
+    try {
+      const info = await api("infoArquivo", { id });
+      if (!String(info.tipo).startsWith("video/")) { toast("Esse arquivo não é um vídeo.", true); return; }
+      if (!info.publico) await api("compartilhar", { ids: [id] });
+      const secao = $("#filtroSecao").value || (dados.secoes[0] || {}).id || "";
+      incluirVideo(videoNovo(info, tituloDoArquivo(info.nome), secao, "horizontal"));
+      $("#dSync").close();
+      marcarSujo(); renderVideos(); renderSecoes();
+      abrirEditor(id);
+      toast("Vídeo adicionado. Confira os dados e clique em Salvar e publicar.");
+    } catch (err) { toast(err.message, true); }
+  });
+
+  // ── Início: entra direto se a senha já estiver guardada nesta aba ──
+  (async () => {
+    let guardada = null;
+    try { guardada = sessionStorage.getItem("vt-senha"); } catch {}
+    if (!API || !guardada) return;
+    senha = guardada;
+    try { await api("entrar"); await abrirPainel(); }
+    catch { try { sessionStorage.removeItem("vt-senha"); } catch {} }
+  })();
+})();
+</script>
+</body>
+</html>
